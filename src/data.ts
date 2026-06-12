@@ -270,7 +270,7 @@ export const PROJECTS: Project[] = [
     "Developed a corporate aviation website highlighting aerospace services and solutions. Implemented responsive layouts, optimized loading performance, and delivered a professional digital experience aligned with industry standards.",
   stack: [""],
   link: "https://skyaerosolutions.com/",
-  video: "/videos/skyaerosolutions.com.mp4",
+  video: "/videos/skyaerosolutions.cpm.mp4",
 },
 {
   title: "Noble Printing Press",
