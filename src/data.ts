@@ -237,7 +237,7 @@ export const PROJECTS: Project[] = [
   description:
     "Designed and developed a modern corporate website for a digital transformation and AI solutions company. Delivered responsive front-end components, optimized performance, and implemented scalable web solutions to strengthen the company's online presence.",
   stack: [""],
-  link: "https://synnect.com",
+  link: "https://synnect.ae",
   video: "/videos/synnect.com.mp4",
 },
 {
