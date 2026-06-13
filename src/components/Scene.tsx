@@ -66,7 +66,7 @@ export default function Scene() {
   return (
     <Canvas
       dpr={dpr}
-      camera={{ position: [0, 0, 4.2], fov: 45 }}
+      camera={{ position: [0, 0, 4.8], fov: 44 }}
       gl={{ antialias: true, alpha: true }}
       onPointerMove={() => (pointer.current = 0.5)}
       onPointerDown={() => (pointer.current = 1.2)}
@@ -78,7 +78,7 @@ export default function Scene() {
       />
       <AdaptiveDpr pixelated />
 
-      <Float speed={1.2} rotationIntensity={0.4} floatIntensity={0.6}>
+      <Float speed={1.0} rotationIntensity={0.6} floatIntensity={0.5}>
         <AbstractShape pointer={pointer} />
       </Float>
       <Dust />
@@ -87,9 +87,9 @@ export default function Scene() {
       {/* the real glow */}
       <EffectComposer>
         <Bloom
-          intensity={0.9}
-          luminanceThreshold={0.2}
-          luminanceSmoothing={0.4}
+          intensity={1.1}
+          luminanceThreshold={0.15}
+          luminanceSmoothing={0.45}
           mipmapBlur
         />
       </EffectComposer>

@@ -4,92 +4,130 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-// 3D simplex noise (Ashima) — makes the surface morph organically.
-const noiseGLSL = /* glsl */ `
-  vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
-  vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
-  vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
-  vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-  float snoise(vec3 v){
-    const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);
-    vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);
-    vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);
-    vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;
-    i=mod289(i);
-    vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
-    float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;
-    vec4 j=p-49.0*floor(p*ns.z*ns.z);
-    vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);
-    vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);
-    vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);
-    vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));
-    vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
-    vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);
-    vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
-    p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
-    vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;
-    return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-  }`;
+const NODE_COUNT   = 30;
+const CONNECT_DIST = 1.28;
+const RADIUS       = 1.5;
+const PACKET_COUNT = 12;
 
-const vertexShader = /* glsl */ `
-  uniform float uTime;
-  uniform float uIntensity;
-  varying float vDisp;
-  ${noiseGLSL}
-  void main(){
-    float n  = snoise(position * 1.4 + uTime * 0.28);
-    float n2 = snoise(position * 3.2 - uTime * 0.40) * 0.35;
-    float disp = (n + n2) * (0.18 + uIntensity * 0.45);
-    vDisp = disp;
-    vec3 p = position + normal * disp;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-  }`;
+// Fibonacci sphere — nodes evenly distributed over a sphere surface
+function fibSphere(n: number, r: number): THREE.Vector3[] {
+  const phi = Math.PI * (3 - Math.sqrt(5)); // golden angle
+  return Array.from({ length: n }, (_, i) => {
+    const y     = 1 - (i / (n - 1)) * 2;
+    const rad   = Math.sqrt(1 - y * y);
+    const theta = phi * i;
+    return new THREE.Vector3(Math.cos(theta) * rad * r, y * r, Math.sin(theta) * rad * r);
+  });
+}
 
-const fragmentShader = /* glsl */ `
-  uniform vec3 uColorA;
-  uniform vec3 uColorB;
-  varying float vDisp;
-  void main(){
-    vec3 c = mix(uColorA, uColorB, smoothstep(-0.25, 0.4, vDisp));
-    c += pow(max(vDisp, 0.0), 1.5) * 0.9;
-    gl_FragColor = vec4(c, 1.0);
-  }`;
+export default function AbstractShape({
+  pointer,
+}: {
+  pointer: React.MutableRefObject<number>;
+}) {
+  const group = useRef<THREE.Group>(null!);
 
-export default function AbstractShape({ pointer }: { pointer: React.MutableRefObject<number> }) {
-  const mesh = useRef<THREE.Mesh>(null!);
-  const matRef = useRef<THREE.ShaderMaterial>(null!);
+  /* ── stable geometry data ── */
+  const nodes = useMemo(() => fibSphere(NODE_COUNT, RADIUS), []);
 
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uIntensity: { value: 0 },
-      // CHANGE COLOURS HERE  (dark base -> bright accent)
-      uColorA: { value: new THREE.Color("#3a1c0e") },
-      uColorB: { value: new THREE.Color("#ff6b35") },
-    }),
+  const connections = useMemo(() => {
+    const out: [THREE.Vector3, THREE.Vector3][] = [];
+    for (let i = 0; i < nodes.length; i++)
+      for (let j = i + 1; j < nodes.length; j++)
+        if (nodes[i].distanceTo(nodes[j]) < CONNECT_DIST)
+          out.push([nodes[i], nodes[j]]);
+    return out;
+  }, [nodes]);
+
+  /* ── Three.js objects (built once) ── */
+  const lineMesh = useMemo(() => {
+    const pos: number[] = [];
+    connections.forEach(([a, b]) => pos.push(a.x, a.y, a.z, b.x, b.y, b.z));
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    return new THREE.LineSegments(
+      geo,
+      new THREE.LineBasicMaterial({ color: "#ff6b35", transparent: true, opacity: 0.2 })
+    );
+  }, [connections]);
+
+  const nodeMesh = useMemo(() => {
+    const pos = new Float32Array(nodes.flatMap(n => [n.x, n.y, n.z]));
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+    return new THREE.Points(
+      geo,
+      new THREE.PointsMaterial({ color: "#ff8c55", size: 0.085, sizeAttenuation: true })
+    );
+  }, [nodes]);
+
+  // mutable packet data — animated dots on connections
+  const packets = useMemo(() =>
+    Array.from({ length: PACKET_COUNT }, () => ({
+      t:     Math.random(),
+      speed: 0.22 + Math.random() * 0.42,
+      conn:  connections.length > 0 ? Math.floor(Math.random() * connections.length) : 0,
+    })),
+    [connections]
+  );
+
+  // packet geometry — position buffer updated every frame
+  const packetGeo = useMemo(() => {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.Float32BufferAttribute(PACKET_COUNT * 3, 3));
+    return geo;
+  }, []);
+
+  const packetMesh = useMemo(() =>
+    new THREE.Points(
+      packetGeo,
+      new THREE.PointsMaterial({ color: "#ffd4aa", size: 0.14, sizeAttenuation: true })
+    ),
+    [packetGeo]
+  );
+
+  // faint outer wireframe sphere — shows the "boundary"
+  const outerSphere = useMemo(() =>
+    new THREE.Mesh(
+      new THREE.SphereGeometry(1.72, 14, 10),
+      new THREE.MeshBasicMaterial({ color: "#ff6b35", wireframe: true, transparent: true, opacity: 0.055 })
+    ),
     []
   );
 
+  /* ── animation ── */
   useFrame((_, delta) => {
-    const u = matRef.current.uniforms;
-    u.uTime.value += delta;
-    // ease intensity toward the pointer-driven target, then decay it
-    u.uIntensity.value += (pointer.current - u.uIntensity.value) * 0.06;
+    // rotate whole network; speed up on pointer activity
+    group.current.rotation.y += delta * (0.09 + pointer.current * 0.07);
+    group.current.rotation.x += delta * 0.03;
     pointer.current *= 0.96;
-    mesh.current.rotation.y += delta * 0.12;
-    mesh.current.rotation.x += delta * 0.05;
+
+    if (connections.length === 0) return;
+
+    // advance data packets along connections
+    const attr = packetGeo.attributes.position as THREE.BufferAttribute;
+    packets.forEach((pkt, i) => {
+      pkt.t += delta * pkt.speed;
+      if (pkt.t > 1) {
+        pkt.t    = 0;
+        pkt.conn = Math.floor(Math.random() * connections.length);
+      }
+      const [a, b] = connections[pkt.conn];
+      attr.setXYZ(i,
+        THREE.MathUtils.lerp(a.x, b.x, pkt.t),
+        THREE.MathUtils.lerp(a.y, b.y, pkt.t),
+        THREE.MathUtils.lerp(a.z, b.z, pkt.t)
+      );
+    });
+    attr.needsUpdate = true;
   });
 
   return (
-    <mesh ref={mesh}>
-      {/* the abstract shape: a high-detail sphere the shader bends into a blob */}
-      <icosahedronGeometry args={[1.35, 64]} />
-      <shaderMaterial
-        ref={matRef}
-        uniforms={uniforms}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-      />
-    </mesh>
+    <group ref={group}>
+      <primitive object={lineMesh}    />
+      <primitive object={nodeMesh}    />
+      <primitive object={packetMesh}  />
+      <primitive object={outerSphere} />
+    </group>
   );
 }
