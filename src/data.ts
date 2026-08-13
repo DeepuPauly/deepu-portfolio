@@ -6,7 +6,7 @@
 export const SITE = {
   name: "DEEPU PAULY",
   role: "Full-Stack Developer",
-  email: "deepupauly@email.com",
+  email: "deepupauly03@gmail.com",
   github: "https://github.com/DeepuPauly",
   linkedin: "https://www.linkedin.com/in/deepu-pauly-0ba30a211/",
 };
