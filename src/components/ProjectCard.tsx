@@ -5,6 +5,7 @@ import type { Project } from "@/data";
 
 export default function ProjectCard({ project: p, index: i }: { project: Project; index: number }) {
   const cardRef = useRef<HTMLAnchorElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   function onMove(e: React.PointerEvent) {
     const c = cardRef.current!;
@@ -21,10 +22,17 @@ export default function ProjectCard({ project: p, index: i }: { project: Project
     c.style.transition = "transform .5s cubic-bezier(.2,.7,.2,1), border-color .4s";
     c.style.transform = "";
     setTimeout(() => { if (cardRef.current) cardRef.current.style.transition = ""; }, 500);
+
+    const v = videoRef.current;
+    if (v) {
+      v.pause();
+      v.currentTime = 0;
+    }
   }
 
   function onEnter() {
     cardRef.current!.style.transition = "border-color .4s";
+    videoRef.current?.play().catch(() => {});
   }
 
   return (
@@ -41,12 +49,12 @@ export default function ProjectCard({ project: p, index: i }: { project: Project
       {p.video ? (
         <div className="card-video-wrap">
           <video
+            ref={videoRef}
             src={p.video}
-            autoPlay
             muted
             loop
             playsInline
-            preload="auto"
+            preload="none"
             className="card-video"
           />
           <div className="card-video-overlay" />
@@ -62,6 +70,11 @@ export default function ProjectCard({ project: p, index: i }: { project: Project
         </div>
         <h3>{p.title}</h3>
         <p>{p.description}</p>
+        {p.stack.filter(Boolean).length > 0 && (
+          <div className="stack">
+            {p.stack.filter(Boolean).map((t) => <span key={t}>{t}</span>)}
+          </div>
+        )}
       </div>
     </a>
   );

@@ -60,8 +60,8 @@ export default function Home() {
       </header>
 
       {/* ── 01 ABOUT ── */}
-      <div className="stripe">
-        <section className="block reveal" id="about">
+      <div className="stripe section-3d">
+        <section className="block" id="about">
           <div className="sec-label">01 — About</div>
           <div className="about-grid">
             <div className="about-text">
@@ -93,7 +93,7 @@ export default function Home() {
       </div>
 
       {/* ── 02 CAPABILITIES ── */}
-      <section className="block" id="skills">
+      <section className="block section-3d" id="skills">
         <div className="sec-label reveal">02 — Capabilities</div>
         <h2 className="reveal">The stack I <span className="em">build with</span>.</h2>
         <div className="marquee-scene reveal">
@@ -128,7 +128,7 @@ export default function Home() {
       </section>
 
       {/* ── 03 EXPERIENCE ── */}
-      <div className="stripe">
+      <div className="stripe section-3d">
         <section className="block" id="experience">
           <div className="sec-label reveal">03 — Experience</div>
           <h2 className="reveal">Where I&apos;ve <span className="em">worked</span>.</h2>
@@ -147,7 +147,7 @@ export default function Home() {
       </div>
 
       {/* ── 04 EDUCATION ── */}
-      <section className="block" id="education">
+      <section className="block section-3d" id="education">
         <div className="sec-label reveal">04 — Education</div>
         <h2 className="reveal">Where I <span className="em">learned</span>.</h2>
         <div className="edu-grid">
@@ -182,7 +182,7 @@ export default function Home() {
       </div>
 
       {/* ── 06 AWARDS ── */}
-      <section className="block" id="awards">
+      <section className="block section-3d" id="awards">
         <div className="sec-label reveal">06 — Awards</div>
         <h2 className="reveal">{emphasize(AWARDS.heading)}</h2>
         <p className="lead reveal">{AWARDS.description}</p>
@@ -208,7 +208,7 @@ export default function Home() {
       </section>
 
       {/* ── 07 CONTACT ── */}
-      <div className="contact-wrap reveal" id="contact">
+      <div className="contact-wrap section-3d" id="contact">
         <ContactCanvas />
         <section className="contact-section">
           <div className="sec-label">07 — Contact</div>

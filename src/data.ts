@@ -3,6 +3,9 @@
 //  Change the text inside the quotes. Don't touch the code parts.
 // ============================================================
 
+// Base URL of the deployed site — used for SEO (sitemap, robots, canonical, OG tags).
+export const SITE_URL = "https://deepu-portfolio-virid.vercel.app";
+
 export const SITE = {
   name: "DEEPU PAULY",
   role: "Full-Stack Developer",
@@ -26,58 +29,11 @@ export const ABOUT = {
   image: "/images/08_k8byaq-removebg-preview.png",   // place your photo at public/images/profile.jpg
   initials: "DP",            // shown when no photo is present
   stats: [
-    { value: "3+",  label: "YEARS BUILDING" },
+    { value: "4",  label: "YEARS BUILDING" },
     { value: "3", label: "COMPANIES / ROLES" },
     { value: "10+", label: "PROJECTS SHIPPED " },
   ],
 };
-
-export type SkillCategory = {
-  name: string;
-  skills: { name: string; level: number }[];
-};
-
-export const SKILL_CATEGORIES: SkillCategory[] = [
-  {
-    name: "Backend & APIs",
-    skills: [
-      { name: "PHP",                level: 90 },
-      { name: "Node.js",            level: 85 },
-      { name: "NestJS",             level: 80 },
-      { name: "Python / FastAPI",   level: 80 },
-      { name: "REST API Design",    level: 88 },
-      { name: "JWT / OAuth2",       level: 82 },
-    ],
-  },
-  {
-    name: "Frontend",
-    skills: [
-      { name: "React.js",      level: 88 },
-      { name: "TypeScript",    level: 85 },
-      { name: "React Native",  level: 75 },
-      { name: "Redux Toolkit", level: 78 },
-      { name: "Tailwind CSS",  level: 85 },
-    ],
-  },
-  {
-    name: "Databases",
-    skills: [
-      { name: "MySQL",      level: 88 },
-      { name: "PostgreSQL", level: 80 },
-      { name: "MongoDB",    level: 72 },
-      { name: "Redis",      level: 72 },
-    ],
-  },
-  {
-    name: "Cloud & DevOps",
-    skills: [
-      { name: "Docker",         level: 78 },
-      { name: "AWS",            level: 72 },
-      { name: "GitHub Actions", level: 78 },
-      { name: "Nginx",          level: 70 },
-    ],
-  },
-];
 
 export const SKILLS: string[] = [
   "PHP", "TypeScript", "JavaScript", "React", "Node.js",
@@ -212,7 +168,7 @@ export const PROJECTS: Project[] = [
   title: "Hostick CRM",
   description:
     "Developed a custom CRM platform to streamline customer management, sales tracking, support operations, and workflow automation. Built responsive dashboards, optimized database performance, and improved operational efficiency through centralized business processes.",
-  stack: [""],
+  stack: ["React.js", "Node.js", "MySQL"],
   link: "https://hostick.io/",
   video: "/videos/hostick.io.mp4",
 },
@@ -220,7 +176,7 @@ export const PROJECTS: Project[] = [
   title: "Pro Handover CRM",
   description:
     "Built and enhanced a property management CRM that simplifies tenant, owner, maintenance, and property tracking. Implemented responsive interfaces, workflow automation, and real-time data management to improve operational efficiency for property management teams.",
-  stack: [""],
+  stack: ["React.js", "PHP", "MySQL"],
   link: "https://www.prohandover.com/",
   video: "/videos/prohandover.com.mp4",
 },
@@ -228,7 +184,7 @@ export const PROJECTS: Project[] = [
   title: "FP Property",
   description:
     "Developed and maintained a real estate platform for property listings, property management, and investment services. Focused on responsive UI development, performance optimization, lead generation workflows, and seamless user experiences across devices.",
-  stack: [""],
+  stack: ["React.js", "PHP", "MySQL"],
   link: "https://fpproperty.com",
   video: "/videos/fpproperty.com.mp4",
 },
@@ -236,7 +192,7 @@ export const PROJECTS: Project[] = [
   title: "Synnect Group LLC-FZ",
   description:
     "Designed and developed a modern corporate website for a digital transformation and AI solutions company. Delivered responsive front-end components, optimized performance, and implemented scalable web solutions to strengthen the company's online presence.",
-  stack: [""],
+  stack: ["React.js", "Tailwind CSS"],
   link: "https://synnect.ae",
   video: "/videos/synnect.com.mp4",
 },
@@ -244,7 +200,7 @@ export const PROJECTS: Project[] = [
   title: "Ve Care Health Care",
   description:
     "Created and maintained a healthcare services website focused on accessibility, responsive design, and user engagement. Implemented modern UI components and optimized site performance to provide a seamless experience for patients and visitors.",
-  stack: [""],
+  stack: ["React.js", "Tailwind CSS"],
   link: "https://vecarehealth.com",
   video: "/videos/vecarehealth.com.mp4",
 },
@@ -252,7 +208,7 @@ export const PROJECTS: Project[] = [
   title: "Finnect Group",
   description:
     "Developed a professional corporate website showcasing business services and solutions. Focused on responsive design, performance optimization, and clean user interfaces that effectively communicate the brand's offerings and expertise.",
-  stack: [""],
+  stack: ["React.js", "Tailwind CSS"],
   link: "https://finnect-group.com",
   video: "/videos/finnect-group.com.mp4",
 },
@@ -260,7 +216,7 @@ export const PROJECTS: Project[] = [
   title: "Mount Haven Properties",
   description:
     "Built and enhanced a property listings platform featuring dynamic property search, listing management, and responsive user interfaces. Improved usability and performance to support real estate sales and property discovery.",
-  stack: [""],
+  stack: ["React.js", "PHP", "MySQL"],
   link: "https://listings.mounthavenproperties.com/",
   video: "/videos/mounthavenproperties.com.mp4",
 },
@@ -268,15 +224,15 @@ export const PROJECTS: Project[] = [
   title: "Sky Aero Solutions",
   description:
     "Developed a corporate aviation website highlighting aerospace services and solutions. Implemented responsive layouts, optimized loading performance, and delivered a professional digital experience aligned with industry standards.",
-  stack: [""],
+  stack: ["React.js", "Tailwind CSS"],
   link: "https://skyaerosolutions.com/",
-  video: "/videos/skyaerosolutions.cpm.mp4",
+  video: "/videos/skyaerosolutions.com.mp4",
 },
 {
   title: "Noble Printing Press",
   description:
     "Designed and developed a modern printing services website featuring product showcases, service information, and lead generation capabilities. Focused on responsive design, performance, and user-friendly navigation.",
-  stack: [""],
+  stack: ["React.js", "Tailwind CSS"],
   link: "https://nobleppt.com/",
   video: "/videos/nobleppt.com.mp4",
 },

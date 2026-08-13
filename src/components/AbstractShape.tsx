@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -21,9 +21,9 @@ function fibSphere(n: number, r: number): THREE.Vector3[] {
 }
 
 export default function AbstractShape({
-  pointer,
+  pointerRef,
 }: {
-  pointer: React.MutableRefObject<number>;
+  pointerRef: React.MutableRefObject<number>;
 }) {
   const group = useRef<THREE.Group>(null!);
 
@@ -62,29 +62,24 @@ export default function AbstractShape({
   }, [nodes]);
 
   // mutable packet data — animated dots on connections
-  const packets = useMemo(() =>
+  const [packets] = useState(() =>
     Array.from({ length: PACKET_COUNT }, () => ({
       t:     Math.random(),
       speed: 0.22 + Math.random() * 0.42,
       conn:  connections.length > 0 ? Math.floor(Math.random() * connections.length) : 0,
-    })),
-    [connections]
+    }))
   );
 
-  // packet geometry — position buffer updated every frame
-  const packetGeo = useMemo(() => {
+  // packet geometry lives on packetMesh.geometry — its position buffer is
+  // mutated imperatively inside useFrame every frame for performance
+  const packetMesh = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.Float32BufferAttribute(PACKET_COUNT * 3, 3));
-    return geo;
-  }, []);
-
-  const packetMesh = useMemo(() =>
-    new THREE.Points(
-      packetGeo,
+    return new THREE.Points(
+      geo,
       new THREE.PointsMaterial({ color: "#ffd4aa", size: 0.14, sizeAttenuation: true })
-    ),
-    [packetGeo]
-  );
+    );
+  }, []);
 
   // faint outer wireframe sphere — shows the "boundary"
   const outerSphere = useMemo(() =>
@@ -96,16 +91,19 @@ export default function AbstractShape({
   );
 
   /* ── animation ── */
+  // useFrame runs outside React's render phase (in r3f's own render loop), so
+  // mutating refs and three.js objects here is the correct, idiomatic pattern.
+  // eslint-disable-next-line react-hooks/immutability
   useFrame((_, delta) => {
     // rotate whole network; speed up on pointer activity
-    group.current.rotation.y += delta * (0.09 + pointer.current * 0.07);
+    group.current.rotation.y += delta * (0.09 + pointerRef.current * 0.07);
     group.current.rotation.x += delta * 0.03;
-    pointer.current *= 0.96;
+    pointerRef.current *= 0.96;
 
     if (connections.length === 0) return;
 
     // advance data packets along connections
-    const attr = packetGeo.attributes.position as THREE.BufferAttribute;
+    const attr = packetMesh.geometry.attributes.position as THREE.BufferAttribute;
     packets.forEach((pkt, i) => {
       pkt.t += delta * pkt.speed;
       if (pkt.t > 1) {
@@ -119,6 +117,7 @@ export default function AbstractShape({
         THREE.MathUtils.lerp(a.z, b.z, pkt.t)
       );
     });
+    // eslint-disable-next-line react-hooks/immutability -- imperative three.js buffer update, see note above
     attr.needsUpdate = true;
   });
 

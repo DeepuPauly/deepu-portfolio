@@ -17,26 +17,24 @@ import AbstractShape from "./AbstractShape";
 // floating dust particles around the shape (atmosphere)
 function Dust() {
   const ref = useRef<THREE.Points>(null!);
-  const positions = useRef(
-    (() => {
-      const n = 600;
-      const arr = new Float32Array(n * 3);
-      for (let i = 0; i < n; i++) {
-        const r = 2.2 + Math.random() * 2.6;
-        const t = Math.random() * Math.PI * 2;
-        const ph = Math.acos(2 * Math.random() - 1);
-        arr[i * 3] = r * Math.sin(ph) * Math.cos(t);
-        arr[i * 3 + 1] = r * Math.sin(ph) * Math.sin(t);
-        arr[i * 3 + 2] = r * Math.cos(ph);
-      }
-      return arr;
-    })()
-  );
+  const [positions] = useState(() => {
+    const n = 600;
+    const arr = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const r = 2.2 + Math.random() * 2.6;
+      const t = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      arr[i * 3] = r * Math.sin(ph) * Math.cos(t);
+      arr[i * 3 + 1] = r * Math.sin(ph) * Math.sin(t);
+      arr[i * 3 + 2] = r * Math.cos(ph);
+    }
+    return arr;
+  });
   useFrame((_, d) => {
     ref.current.rotation.y += d * 0.02;
   });
   return (
-    <Points ref={ref} positions={positions.current} stride={3}>
+    <Points ref={ref} positions={positions} stride={3}>
       <PointMaterial
         transparent
         color="#ffae8a"
@@ -60,7 +58,7 @@ function Rig() {
 }
 
 export default function Scene() {
-  const pointer = useRef(0); // pushed up on hover/click, decays in the shape
+  const pointerRef = useRef(0); // pushed up on hover/click, decays in the shape
   const [dpr, setDpr] = useState(1.5);
 
   return (
@@ -68,8 +66,8 @@ export default function Scene() {
       dpr={dpr}
       camera={{ position: [0, 0, 4.8], fov: 44 }}
       gl={{ antialias: true, alpha: true }}
-      onPointerMove={() => (pointer.current = 0.5)}
-      onPointerDown={() => (pointer.current = 1.2)}
+      onPointerMove={() => (pointerRef.current = 0.5)}
+      onPointerDown={() => (pointerRef.current = 1.2)}
     >
       {/* auto lower quality on weak devices to keep it smooth */}
       <PerformanceMonitor
@@ -79,7 +77,7 @@ export default function Scene() {
       <AdaptiveDpr pixelated />
 
       <Float speed={1.0} rotationIntensity={0.6} floatIntensity={0.5}>
-        <AbstractShape pointer={pointer} />
+        <AbstractShape pointerRef={pointerRef} />
       </Float>
       <Dust />
       <Rig />
