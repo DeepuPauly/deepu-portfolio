@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { Suspense, lazy, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
+
+const Glow = lazy(() => import("./Glow"));
 
 function Rings() {
   const r1 = useRef<THREE.Mesh>(null!);
@@ -44,22 +45,26 @@ function Rings() {
   );
 }
 
-export default function ContactRings() {
+export default function ContactRings({
+  active = true,
+  lite = false,
+}: {
+  active?: boolean;
+  lite?: boolean;
+}) {
   return (
     <Canvas
+      frameloop={active ? "always" : "never"}
       camera={{ position: [0, 0, 3.8], fov: 50 }}
       gl={{ antialias: true, alpha: true }}
-      dpr={[1, 1.5]}
+      dpr={lite ? 1 : [1, 1.5]}
     >
       <Rings />
-      <EffectComposer>
-        <Bloom
-          intensity={1.6}
-          luminanceThreshold={0.05}
-          luminanceSmoothing={0.6}
-          mipmapBlur
-        />
-      </EffectComposer>
+      {!lite && (
+        <Suspense fallback={null}>
+          <Glow intensity={1.6} luminanceThreshold={0.05} luminanceSmoothing={0.6} />
+        </Suspense>
+      )}
     </Canvas>
   );
 }

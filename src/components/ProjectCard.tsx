@@ -48,6 +48,17 @@ export default function ProjectCard({ project: p, index: i }: { project: Project
     >
       {p.video ? (
         <div className="card-video-wrap">
+          {/* lightweight lazy poster; the video itself only downloads on hover */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="card-poster"
+            src={p.video.replace("/videos/", "/posters/").replace(/\.mp4$/, ".webp")}
+            alt=""
+            width={640}
+            height={305}
+            loading="lazy"
+            decoding="async"
+          />
           <video
             ref={videoRef}
             src={p.video}

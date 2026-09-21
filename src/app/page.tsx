@@ -1,12 +1,13 @@
-import type { CSSProperties } from "react";
-import HeroCanvas from "@/components/HeroCanvas";
+import Image from "next/image";
+import HeroVideo from "@/components/HeroVideo";
+import CountUp from "@/components/CountUp";
 import ContactCanvas from "@/components/ContactCanvas";
-import Reveal from "@/components/Reveal";
 import ProjectCard from "@/components/ProjectCard";
 import ExpCard from "@/components/ExpCard";
+import SkillCard from "@/components/SkillCard";
 import {
   SITE, HERO, ABOUT,
-  SKILLS,
+  SKILL_GROUPS,
   EXPERIENCE, EDUCATION, PROJECTS, AWARDS,
 } from "@/data";
 
@@ -20,13 +21,31 @@ function emphasize(text: string) {
   );
 }
 
-const ROW1 = [...SKILLS, ...SKILLS];
-const ROW2 = [...SKILLS.slice().reverse(), ...SKILLS.slice().reverse()];
-const ROW3 = [...SKILLS, ...SKILLS];
+// renders one value of the About "code card" with syntax colouring
+function CodeValue({ value }: { value: string | string[] | boolean }) {
+  if (typeof value === "boolean") return <span className="tk-bool">{String(value)}</span>;
+  if (Array.isArray(value)) {
+    return (
+      <>
+        <span className="tk-p">[</span>
+        {value.map((v, i) => (
+          <span key={v}>
+            <span className="tk-str">&quot;{v}&quot;</span>
+            {i < value.length - 1 && <span className="tk-p">, </span>}
+          </span>
+        ))}
+        <span className="tk-p">]</span>
+      </>
+    );
+  }
+  return <span className="tk-str">&quot;{value}&quot;</span>;
+}
+
+const SKILL_TOTAL = SKILL_GROUPS.reduce((n, g) => n + g.items.length, 0);
 
 export default function Home() {
   return (
-    <Reveal>
+    <>
 
       {/* ── NAV ── */}
       <nav className="nav">
@@ -43,103 +62,107 @@ export default function Home() {
       </nav>
 
       {/* ── HERO ── */}
+      {/* pinned + scroll-scrubbed video; the texts after the last frame (HeroVideo.tsx) */}
       <header className="hero">
-        <HeroCanvas />
-        <div className="hero-content">
-          <div className="kicker">{HERO.kicker}</div>
-          <h1>
-            <span className="line"><b>{emphasize(HERO.titleLine1)}</b></span>
-            <span className="line"><b>{emphasize(HERO.titleLine2)}</b></span>
-          </h1>
-          <p className="sub">{HERO.subtitle}</p>
-        </div>
-        <div className="scroll-hint">
-          <span className="dot" />
-          Scroll
+        <noscript>
+          <style>{".hero{height:100vh}.hero-content *{opacity:1!important;transform:none!important}"}</style>
+        </noscript>
+        <div className="hero-stage">
+          <HeroVideo />
+          <div className="hero-content">
+            <div className="kicker">{HERO.kicker}</div>
+            <h1>
+              <span className="line"><b>{emphasize(HERO.titleLine1)}</b></span>
+              <span className="line"><b>{emphasize(HERO.titleLine2)}</b></span>
+            </h1>
+            <p className="sub">{HERO.subtitle}</p>
+          </div>
+          <div className="scroll-hint">
+            <span className="dot" />
+            Scroll
+          </div>
         </div>
       </header>
 
       {/* ── 01 ABOUT ── */}
-      <div className="stripe section-3d">
-        <section className="block" id="about">
+      <div className="stripe about-stripe">
+        <div className="about-glow" aria-hidden="true" />
+        <section className="block about" id="about">
           <div className="sec-label">01 — About</div>
-          <div className="about-grid">
-            <div className="about-text">
-              <h2>{emphasize(ABOUT.heading)}</h2>
-              <p className="lead">{ABOUT.body}</p>
-              <div className="about-stats">
-                {ABOUT.stats.map((s) => (
-                  <div className="stat" key={s.label}>
-                    <div className="stat-value">{s.value}</div>
-                    <span className="stat-label">{s.label}</span>
+          <h2 className="about-title">{emphasize(ABOUT.heading)}</h2>
+
+          <div className="about-cols">
+            <p className="about-body">{emphasize(ABOUT.body)}</p>
+
+            {/* developer-style profile card, driven by ABOUT.card in data.ts */}
+            <div className="code-card" aria-label="Profile summary">
+              <div className="code-bar">
+                <span className="code-dot code-dot--r" />
+                <span className="code-dot code-dot--y" />
+                <span className="code-dot code-dot--g" />
+                <span className="code-file">{ABOUT.card.file}</span>
+              </div>
+              <div className="code-body">
+                <div className="code-line">
+                  <span className="tk-kw">const</span> <span className="tk-var">{ABOUT.card.variable}</span>{" "}
+                  <span className="tk-p">= {"{"}</span>
+                </div>
+                {ABOUT.card.entries.map((e) => (
+                  <div className="code-line code-indent" key={e.key}>
+                    <span className="tk-key">{e.key}</span>
+                    <span className="tk-p">: </span>
+                    <CodeValue value={e.value} />
+                    <span className="tk-p">,</span>
                   </div>
                 ))}
+                <div className="code-line">
+                  <span className="tk-p">{"};"}</span>
+                  <span className="code-cursor" />
+                </div>
               </div>
             </div>
-            <div className="about-image-wrap">
-              <div className="about-img-frame">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={ABOUT.image}
-                  alt={`${SITE.name} profile photo`}
-                  className="about-profile-img"
-                />
-                <div className="about-img-fade" />
+          </div>
+
+          <div className="about-stats">
+            {ABOUT.stats.map((s) => (
+              <div className="stat" key={s.label}>
+                <div className="stat-value"><CountUp value={s.value} /></div>
+                <span className="stat-label">{s.label}</span>
               </div>
-              <div className="about-orb" />
-            </div>
+            ))}
           </div>
         </section>
       </div>
 
       {/* ── 02 CAPABILITIES ── */}
-      <section className="block section-3d" id="skills">
-        <div className="sec-label reveal">02 — Capabilities</div>
-        <h2 className="reveal">The stack I <span className="em">build with</span>.</h2>
-        <div className="marquee-scene reveal">
-          <div className="marquee-track">
-            <div className="marquee-inner">
-              {ROW1.map((s, i) => (
-                <span className="m-pill" key={i}>
-                  {s}<span className="m-dot">·</span>
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="marquee-track marquee-track--rtl marquee-track--lg">
-            <div className="marquee-inner marquee-inner--rtl">
-              {ROW2.map((s, i) => (
-                <span className="m-pill m-pill--lg" key={i}>
-                  <span className="m-dot m-dot--accent">✦</span>{s}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="marquee-track">
-            <div className="marquee-inner marquee-inner--slow">
-              {ROW3.map((s, i) => (
-                <span className="m-pill" key={i}>
-                  {s}<span className="m-dot">·</span>
-                </span>
-              ))}
-            </div>
-          </div>
+      <section className="block" id="skills">
+        <div className="sec-label">02 — Capabilities</div>
+        <h2>The stack I <span className="em">build with</span>.</h2>
+        <p className="skills-caption">
+          {SKILL_TOTAL} skills across {SKILL_GROUPS.length} areas — the ones I reach for on real projects.
+        </p>
+        <div className="skills-grid">
+          {SKILL_GROUPS.map((g, i) => (
+            <SkillCard key={g.title} group={g} index={i} />
+          ))}
         </div>
       </section>
 
       {/* ── 03 EXPERIENCE ── */}
-      <div className="stripe section-3d">
+      <div className="stripe">
         <section className="block" id="experience">
-          <div className="sec-label reveal">03 — Experience</div>
-          <h2 className="reveal">Where I&apos;ve <span className="em">worked</span>.</h2>
-          <div className="exp-list">
+          <div className="sec-label">03 — Experience</div>
+          <h2>Where I&apos;ve <span className="em">worked</span>.</h2>
+          {/* alternating timeline: card on one side, date on the other, node on the centre line */}
+          <div className="exp-timeline">
             {EXPERIENCE.map((exp, i) => (
               <div
-                className="reveal"
+                className={`tl-row ${i % 2 === 0 ? "tl-row--left" : "tl-row--right"}${/present/i.test(exp.period) ? " tl-row--current" : ""}`}
                 key={i}
-                style={{ transitionDelay: `${i * 0.1}s` } as CSSProperties}
               >
-                <ExpCard exp={exp} index={i} />
+                <div className="tl-date"><span>{exp.period}</span></div>
+                <div className="tl-node" aria-hidden="true" />
+                <div className="tl-card"><ExpCard exp={exp} /></div>
               </div>
             ))}
           </div>
@@ -147,16 +170,15 @@ export default function Home() {
       </div>
 
       {/* ── 04 EDUCATION ── */}
-      <section className="block section-3d" id="education">
-        <div className="sec-label reveal">04 — Education</div>
-        <h2 className="reveal">Where I <span className="em">learned</span>.</h2>
+      <section className="block" id="education">
+        <div className="sec-label">04 — Education</div>
+        <h2>Where I <span className="em">learned</span>.</h2>
         <div className="edu-grid">
           {EDUCATION.map((edu, i) => (
             <div
-              className="edu-card reveal"
+              className="edu-card"
               key={i}
               data-year={edu.period.slice(0, 4)}
-              style={{ transitionDelay: `${i * 0.15}s` } as CSSProperties}
             >
               <div className="edu-period">{edu.period}</div>
               <div className="edu-school">{edu.school}</div>
@@ -170,7 +192,7 @@ export default function Home() {
 
       {/* ── 05 PROJECTS ── */}
       <div className="stripe">
-        <section className="block reveal" id="work">
+        <section className="block" id="work">
           <div className="sec-label">05 — Selected Work</div>
           <h2>Things I&apos;ve <span className="em">shipped</span>.</h2>
           <div className="projects">
@@ -182,23 +204,25 @@ export default function Home() {
       </div>
 
       {/* ── 06 AWARDS ── */}
-      <section className="block section-3d" id="awards">
-        <div className="sec-label reveal">06 — Awards</div>
-        <h2 className="reveal">{emphasize(AWARDS.heading)}</h2>
-        <p className="lead reveal">{AWARDS.description}</p>
+      <section className="block" id="awards">
+        <div className="sec-label">06 — Awards</div>
+        <h2>{emphasize(AWARDS.heading)}</h2>
+        <p className="lead">{AWARDS.description}</p>
         <div className="awards-grid">
           {AWARDS.items.map((award, i) => (
             <div
-              className="award-card reveal"
+              className="award-card"
               key={i}
-              style={{ transitionDelay: `${i * 0.15}s` } as CSSProperties}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={award.image}
-                alt={award.alt}
-                className="award-img"
-              />
+              <div className="award-media">
+                <Image
+                  src={award.image}
+                  alt={award.alt}
+                  className="award-img"
+                  fill
+                  sizes="(max-width: 700px) 100vw, 560px"
+                />
+              </div>
               {award.caption && (
                 <div className="award-caption">{award.caption}</div>
               )}
@@ -208,7 +232,7 @@ export default function Home() {
       </section>
 
       {/* ── 07 CONTACT ── */}
-      <div className="contact-wrap section-3d" id="contact">
+      <div className="contact-wrap" id="contact">
         <ContactCanvas />
         <section className="contact-section">
           <div className="sec-label">07 — Contact</div>
@@ -243,6 +267,6 @@ export default function Home() {
         </div>
       </div>
 
-    </Reveal>
+    </>
   );
 }

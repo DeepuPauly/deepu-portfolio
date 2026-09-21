@@ -22,25 +22,63 @@ export const HERO = {
     "I design and engineer end-to-end products — the data models, the logic, and the interfaces on top.",
 };
 
+export type CardValue = string | string[] | boolean;
+
 export const ABOUT = {
   heading: "I turn ideas into *fast, reliable* software that ships.",
-  body: "I'm a full-stack engineer in Dubai who builds production web apps from the data layer up. I like the hard, quiet parts — clean schemas, sane auth, multi-role systems that stay correct under load — and turning them into tools people actually use. Right now I'm going deeper on backend systems and picking up Go.",
-  // Place your photo at public/profile.jpg — it will replace the initials placeholder
-  image: "/images/08_k8byaq-removebg-preview.png",   // place your photo at public/images/profile.jpg
-  initials: "DP",            // shown when no photo is present
+  // Wrap words in *stars* to highlight them.
+  body: "I'm a full-stack engineer in Dubai who builds *production applications* from the database up. I focus on *scalable APIs, secure authentication, real-time systems*, and intuitive interfaces — turning complex business requirements into reliable software that people use every day.",
+  // The code-window profile card next to the story. Each entry is one line of the object.
+  // A value can be text, a list of text, or true/false.
+  card: {
+    file: "deepu.ts",
+    variable: "deepu",
+    entries: [
+      { key: "name", value: "Deepu Pauly" },
+      { key: "role", value: "Full-Stack Engineer" },
+      { key: "location", value: "Dubai, UAE" },
+      { key: "stack", value: ["TypeScript", "React", "Next.js", "Node.js", "Python", "PostgreSQL"] },
+      { key: "builds", value: ["production web apps", "scalable APIs", "real-time systems"] },
+      { key: "available", value: true },
+    ] as { key: string; value: CardValue }[],
+  },
+  // Numbers count up when they scroll into view ("10+" counts to 10 and keeps the "+").
   stats: [
-    { value: "4",  label: "YEARS BUILDING" },
+    { value: "4", label: "YEARS BUILDING" },
     { value: "3", label: "COMPANIES / ROLES" },
-    { value: "10+", label: "PROJECTS SHIPPED " },
+    { value: "10+", label: "PROJECTS SHIPPED" },
   ],
 };
 
-export const SKILLS: string[] = [
-  "PHP", "TypeScript", "JavaScript", "React", "Node.js",
-  "NestJS", "Python", "FastAPI", "React Native", "Redux Toolkit",
-  "MySQL", "PostgreSQL", "MongoDB", "Redis",
-  "Docker", "AWS", "GitHub Actions", "Nginx", "Tailwind",
-  "Go (learning)",
+export type SkillGroup = {
+  title: string;
+  items: string[];
+  span?: 2 | 3 | 4; // how much of the 6-column row the card takes (default 2)
+};
+
+// Capabilities section: one card per group. Add/remove skills freely.
+export const SKILL_GROUPS: SkillGroup[] = [
+  { title: "Languages", span: 2, items: ["JavaScript", "TypeScript", "Python", "PHP"] },
+  {
+    title: "Backend", span: 4,
+    items: ["Node.js", "NestJS", "FastAPI", "Django", "REST API design", "JWT / OAuth2", "WebSockets"],
+  },
+  {
+    title: "Frontend", span: 3,
+    items: ["React.js", "Next.js", "Redux Toolkit", "React Native", "HTML5", "CSS3", "Tailwind CSS"],
+  },
+  {
+    title: "Databases", span: 3,
+    items: ["PostgreSQL", "MySQL", "MongoDB", "Redis", "Query optimisation", "Indexing"],
+  },
+  {
+    title: "Cloud & DevOps", span: 3,
+    items: ["AWS (S3, Lambda, ECS, CloudWatch)", "Docker", "GitHub Actions", "CI/CD", "Nginx"],
+  },
+  {
+    title: "Practices", span: 3,
+    items: ["Agile", "Code review", "Automated testing (Jest, PyTest)", "Microservices", "Event-driven design"],
+  },
 ];
 
 export type Experience = {
@@ -141,12 +179,12 @@ export const AWARDS = {
   description: "Recognition earned through consistent learning, hands-on delivery, and a drive to grow as an engineer.",
   items: [
     {
-      image: "images/1771443027774.jpg",
+      image: "/images/1771443027774.jpg",
       alt: "Certificate or Award 1",
       caption: "Rising Star Award 2024 – FP Property",
     },
     {
-      image: "images/1771443052624.jpg",
+      image: "/images/1771443052624.jpg",
       alt: "Certificate or Award 2",
       caption: "Award Recognition Ceremony 2024",
     },

@@ -3,7 +3,8 @@
 import { useRef } from "react";
 import type { Experience } from "@/data";
 
-export default function ExpCard({ exp, index }: { exp: Experience; index: number }) {
+// One experience card. The date + timeline node live in the row around it (see page.tsx).
+export default function ExpCard({ exp }: { exp: Experience }) {
   const ref = useRef<HTMLDivElement>(null);
 
   function onMove(e: React.PointerEvent) {
@@ -11,7 +12,7 @@ export default function ExpCard({ exp, index }: { exp: Experience; index: number
     const r = c.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width - 0.5;
     const y = (e.clientY - r.top) / r.height - 0.5;
-    c.style.transform = `perspective(1100px) rotateY(${x * 5}deg) rotateX(${-y * 3.5}deg) translateY(-4px)`;
+    c.style.transform = `perspective(1100px) rotateY(${x * 4}deg) rotateX(${-y * 3}deg) translateY(-4px)`;
     c.style.setProperty("--mx", `${e.clientX - r.left}px`);
     c.style.setProperty("--my", `${e.clientY - r.top}px`);
   }
@@ -38,37 +39,34 @@ export default function ExpCard({ exp, index }: { exp: Experience; index: number
       {/* radial glow follows cursor */}
       <div className="exp-glow" />
 
-      <div className="exp-num">0{index + 1}</div>
+      <h3 className="exp-role">{exp.role}</h3>
 
-      <div className="exp-body">
-        <div className="exp-top">
-          <div>
-            <div className="exp-role">{exp.role}</div>
-            <div className="exp-meta">
-              <span className="exp-company">{exp.company}</span>
-              {exp.type     && <span className="exp-badge">{exp.type}</span>}
-              {exp.location && <span className="exp-location">{exp.location}</span>}
-            </div>
-          </div>
-          <div className="exp-period">{exp.period}</div>
-        </div>
-
-        <p className="exp-desc">{exp.description}</p>
-
-        {exp.achievements && (
-          <ul className="exp-achievements">
-            {exp.achievements.map((a, i) => (
-              <li key={i}>{a}</li>
-            ))}
-          </ul>
+      <div className="exp-meta">
+        <span className="exp-company">{exp.company}</span>
+        {exp.location && (
+          <>
+            <span className="exp-sep">•</span>
+            <span className="exp-location">{exp.location}</span>
+          </>
         )}
-
-        {exp.stack && (
-          <div className="exp-tags">
-            {exp.stack.map((t) => <span key={t}>{t}</span>)}
-          </div>
-        )}
+        {exp.type && <span className="exp-badge">{exp.type}</span>}
       </div>
+
+      <p className="exp-desc">{exp.description}</p>
+
+      {exp.achievements && (
+        <ul className="exp-achievements">
+          {exp.achievements.map((a, i) => (
+            <li key={i}>{a}</li>
+          ))}
+        </ul>
+      )}
+
+      {exp.stack && (
+        <div className="exp-tags">
+          {exp.stack.map((t) => <span key={t}>{t}</span>)}
+        </div>
+      )}
     </div>
   );
 }
