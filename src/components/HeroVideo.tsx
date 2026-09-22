@@ -59,7 +59,10 @@ export default function HeroVideo() {
       const p = total > 0 ? clamp(-hero.getBoundingClientRect().top / total, 0, 1) : 0;
       progressTime = clamp(p / VIDEO_SHARE, 0, 1) * duration();
       hero.classList.toggle("is-revealed", p >= REVEAL_AT);
-      hero.classList.toggle("is-scrolled", p > 0.005);
+      // the "Scroll to explore" hint stays up through roughly the first two screens of
+      // scrolling, but never past the point where the video is mostly through
+      const hintFadeAt = total > 0 ? Math.min((2 * window.innerHeight) / total, 0.65) : 0.65;
+      hero.classList.toggle("is-deep-scrolled", p >= hintFadeAt);
     };
 
     /* ───────────── phones: canvas + frame sequence ───────────── */

@@ -84,11 +84,16 @@ body::after{
 
 /* "scroll" hint: visible at the start, gone as soon as the video starts scrubbing */
 .scroll-hint{position:absolute;bottom:34px;left:clamp(20px,5vw,64px);z-index:2;
-  font-family:var(--font-mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#a89e94;
-  display:flex;align-items:center;gap:10px;transition:opacity .4s}
-.hero.is-scrolled .scroll-hint{opacity:0}
-.scroll-hint .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.7)}}
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:#a89e94;
+  display:flex;align-items:center;gap:12px;transition:opacity .5s ease}
+/* stays visible through roughly the first two screens of scrolling, then fades as the video
+   nears its end (see the "is-deep-scrolled" toggle in HeroVideo.tsx) */
+.hero.is-deep-scrolled .scroll-hint{opacity:0}
+.scroll-arrow{
+  display:inline-flex;color:var(--accent);font-size:15px;line-height:1;
+  animation:arrow-bounce 1.6s ease-in-out infinite;
+}
+@keyframes arrow-bounce{0%,50%,100%{transform:translateY(0)}25%{transform:translateY(5px)}}
 @media(prefers-reduced-motion:reduce){
   .hero{height:100vh;height:100svh}
   .hero-stage{position:relative}
@@ -603,7 +608,7 @@ body::after{
 
 /* ── REDUCED MOTION: stop the decorative infinite animations ── */
 @media (prefers-reduced-motion:reduce){
-  .block h2 .em,.contact-section h2 .em,.scroll-hint .dot{animation:none}
+  .block h2 .em,.contact-section h2 .em,.scroll-arrow{animation:none}
   html{scroll-behavior:auto}
 }
 

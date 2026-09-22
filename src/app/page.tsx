@@ -78,8 +78,8 @@ export default function Home() {
             <p className="sub">{HERO.subtitle}</p>
           </div>
           <div className="scroll-hint">
-            <span className="dot" />
-            Scroll
+            <span className="scroll-arrow" aria-hidden="true">&darr;</span>
+            Scroll to explore
           </div>
         </div>
       </header>
